@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPokemons(currentPage);
     
     // Eventos
-    searchButton.addEventListener('click', searchPokemon);
+    searchButton.addEventListener('click', applyFilters);
     searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') searchPokemon();
+        if (e.key === 'Enter') applyFilters();
     });
     
     prevButton.addEventListener('click', () => {
@@ -47,10 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    typeFilter.addEventListener('change', filterPokemons);
-    generationFilter.addEventListener('change', filterPokemons);
+    // Eventos para los filtros
+    typeFilter.addEventListener('change', applyFilters);
+    generationFilter.addEventListener('change', applyFilters);
     if (attributeFilter) {
-        attributeFilter.addEventListener('change', filterPokemons);
+        attributeFilter.addEventListener('change', applyFilters);
     }
     resetFiltersButton.addEventListener('click', resetFilters);
     
@@ -142,9 +143,15 @@ function createPokemonCard(pokemon) {
 
 // Función para mostrar detalles de Pokémon
 function showPokemonDetails(pokemon) {
-    // Preparar las estadísticas base si están disponibles
+    // Preparar información de categoría
+    let categoryInfo = 'Normal';
+    if (pokemon.is_legendary) categoryInfo = 'Legendario';
+    if (pokemon.is_mythical) categoryInfo = 'Mítico';
+    if (pokemon.is_shiny) categoryInfo += ' (Shiny)';
+
+    // Preparar sección de estadísticas si están disponibles
     let statsHTML = '';
-    if (pokemon.base_hp) {
+    if (pokemon.base_hp !== undefined) {
         statsHTML = `
             <div class="info-section">
                 <h3>Estadísticas base</h3>
@@ -208,12 +215,6 @@ function showPokemonDetails(pokemon) {
         `;
     }
 
-    // Mostrar información sobre si es legendario o mítico
-    let categoryInfo = 'Normal';
-    if (pokemon.is_legendary) categoryInfo = 'Legendario';
-    if (pokemon.is_mythical) categoryInfo = 'Mítico';
-    if (pokemon.is_shiny) categoryInfo += ' (Shiny)';
-
     modalContentContainer.innerHTML = `
         <div class="modal-pokemon-header" style="background: var(--type-${pokemon.type1.toLowerCase()})">
             <span class="modal-pokemon-id">#${String(pokemon.id).padStart(3, '0')}</span>
@@ -259,54 +260,42 @@ function showPokemonDetails(pokemon) {
     modal.classList.add('show');
 }
 
-// Función para buscar Pokémon
-function searchPokemon() {
+// Función para aplicar filtros
+function applyFilters() {
     const searchTerm = searchInput.value.trim().toLowerCase();
-    
-    if (searchTerm === '') {
-        resetFilters();
-        return;
-    }
-    
-    filteredPokemons = pokemonsData.filter(pokemon => 
-        pokemon.name.toLowerCase().includes(searchTerm) || 
-        pokemon.id.toString() === searchTerm
-    );
-    
-    currentPage = 1;
-    loadPokemons(currentPage);
-}
-
-// Función para filtrar Pokémon
-function filterPokemons() {
     const selectedType = typeFilter.value.toLowerCase();
     const selectedGeneration = generationFilter.value;
     const selectedAttribute = attributeFilter ? attributeFilter.value : '';
     
     filteredPokemons = pokemonsData.filter(pokemon => {
-        const typeMatch = selectedType === '' || 
+        // Filtro de búsqueda por nombre o ID
+        const searchMatch = !searchTerm || 
+                           pokemon.name.toLowerCase().includes(searchTerm) || 
+                           pokemon.id.toString() === searchTerm;
+        
+        // Filtro por tipo
+        const typeMatch = !selectedType || 
                          pokemon.type1.toLowerCase() === selectedType || 
                          (pokemon.type2 && pokemon.type2.toLowerCase() === selectedType);
         
-        const generationMatch = selectedGeneration === '' || 
+        // Filtro por generación
+        const generationMatch = !selectedGeneration || 
                                pokemon.generation.toString() === selectedGeneration;
         
+        // Filtro por atributo (legendario, mítico, shiny)
         let attributeMatch = true;
-        if (attributeFilter && selectedAttribute !== '') {
-            switch (selectedAttribute) {
-                case 'legendary':
-                    attributeMatch = pokemon.is_legendary;
-                    break;
-                case 'mythical':
-                    attributeMatch = pokemon.is_mythical;
-                    break;
-                case 'shiny':
-                    attributeMatch = pokemon.is_shiny;
-                    break;
+        if (attributeFilter && selectedAttribute) {
+            if (selectedAttribute === 'legendary') {
+                attributeMatch = pokemon.is_legendary;
+            } else if (selectedAttribute === 'mythical') {
+                attributeMatch = pokemon.is_mythical;
+            } else if (selectedAttribute === 'shiny') {
+                attributeMatch = pokemon.is_shiny;
             }
         }
         
-        return typeMatch && generationMatch && attributeMatch;
+        // Combinar todos los filtros con operador AND
+        return searchMatch && typeMatch && generationMatch && attributeMatch;
     });
     
     currentPage = 1;
@@ -341,33 +330,163 @@ function updatePaginationButtons() {
     nextButton.disabled = currentPage === totalPages || totalPages === 0;
 }
 
-// Función para añadir efectos visuales a las tarjetas de Pokémon legendarios y míticos
-function applySpecialEffects() {
-    // Añadir efectos a Pokémon legendarios
-    document.querySelectorAll('.legendary-pokemon').forEach(card => {
-        card.style.boxShadow = '0 0 15px 5px rgba(255, 215, 0, 0.6)';
-    });
+// Función para aplicar filtros
+function applyFilters() {
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    const selectedType = typeFilter.value.toLowerCase();
+    const selectedGeneration = generationFilter.value;
+    const selectedAttribute = attributeFilter ? attributeFilter.value : '';
     
-    // Añadir efectos a Pokémon míticos
-    document.querySelectorAll('.mythical-pokemon').forEach(card => {
-        card.style.boxShadow = '0 0 15px 5px rgba(186, 85, 211, 0.6)';
-    });
-    
-    // Añadir efectos a Pokémon shiny
-    document.querySelectorAll('.shiny-pokemon').forEach(card => {
-        const image = card.querySelector('.pokemon-image');
-        if (image) {
-            image.style.filter = 'brightness(1.2) saturate(1.5) drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3))';
+    filteredPokemons = pokemonsData.filter(pokemon => {
+        // Filtro de búsqueda por nombre o ID
+        const searchMatch = !searchTerm || 
+                           pokemon.name.toLowerCase().includes(searchTerm) || 
+                           pokemon.id.toString() === searchTerm;
+        
+        // Filtro por tipo
+        const typeMatch = !selectedType || 
+                         pokemon.type1.toLowerCase() === selectedType || 
+                         (pokemon.type2 && pokemon.type2.toLowerCase() === selectedType);
+        
+        // Filtro por generación
+        const generationMatch = !selectedGeneration || 
+                               pokemon.generation.toString() === selectedGeneration;
+        
+        // Filtro por atributo (legendario, mítico, shiny)
+        let attributeMatch = true;
+        if (attributeFilter && selectedAttribute) {
+            if (selectedAttribute === 'legendary') {
+                attributeMatch = pokemon.is_legendary;
+            } else if (selectedAttribute === 'mythical') {
+                attributeMatch = pokemon.is_mythical;
+            } else if (selectedAttribute === 'shiny') {
+                attributeMatch = pokemon.is_shiny;
+            }
         }
+        
+        // Combinar todos los filtros con operador AND
+        return searchMatch && typeMatch && generationMatch && attributeMatch;
     });
+    
+    currentPage = 1;
+    loadPokemons(currentPage);
 }
 
-// Llamar a la función después de cargar los Pokémon
-document.addEventListener('DOMContentLoaded', () => {
-    // Resto del código de inicialización...
+// Función para mostrar detalles de Pokémon
+function showPokemonDetails(pokemon) {
+    // Preparar información de categoría
+    let categoryInfo = 'Normal';
+    if (pokemon.is_legendary) categoryInfo = 'Legendario';
+    if (pokemon.is_mythical) categoryInfo = 'Mítico';
+    if (pokemon.is_shiny) categoryInfo += ' (Shiny)';
+
+    // Preparar sección de estadísticas si están disponibles
+    let statsHTML = '';
+    if (pokemon.base_hp !== undefined) {
+        statsHTML = `
+            <div class="info-section">
+                <h3>Estadísticas base</h3>
+                <div class="pokemon-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <span class="stat-name">HP</span>
+                            <span class="stat-value">${pokemon.base_hp}</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: ${Math.min(100, pokemon.base_hp / 2.55)}%; background-color: #ff5959;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <span class="stat-name">Ataque</span>
+                            <span class="stat-value">${pokemon.base_attack}</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: ${Math.min(100, pokemon.base_attack / 2.55)}%; background-color: #f5ac78;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <span class="stat-name">Defensa</span>
+                            <span class="stat-value">${pokemon.base_defense}</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: ${Math.min(100, pokemon.base_defense / 2.55)}%; background-color: #fae078;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <span class="stat-name">Ataque Esp.</span>
+                            <span class="stat-value">${pokemon.base_sp_attack}</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: ${Math.min(100, pokemon.base_sp_attack / 2.55)}%; background-color: #9db7f5;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <span class="stat-name">Defensa Esp.</span>
+                            <span class="stat-value">${pokemon.base_sp_defense}</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: ${Math.min(100, pokemon.base_sp_defense / 2.55)}%; background-color: #a7db8d;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <span class="stat-name">Velocidad</span>
+                            <span class="stat-value">${pokemon.base_speed}</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: ${Math.min(100, pokemon.base_speed / 2.55)}%; background-color: #fa92b2;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    modalContentContainer.innerHTML = `
+        <div class="modal-pokemon-header" style="background: var(--type-${pokemon.type1.toLowerCase()})">
+            <span class="modal-pokemon-id">#${String(pokemon.id).padStart(3, '0')}</span>
+            <h2 class="modal-pokemon-name">${pokemon.name}</h2>
+            <div class="modal-pokemon-types">
+                <span class="type-badge type-${pokemon.type1.toLowerCase()}">${pokemon.type1}</span>
+                ${pokemon.type2 ? `<span class="type-badge type-${pokemon.type2.toLowerCase()}">${pokemon.type2}</span>` : ''}
+            </div>
+            <div class="modal-pokemon-image-container">
+                <img src="${pokemon.sprite_url}" alt="${pokemon.name}" class="modal-pokemon-image">
+            </div>
+        </div>
+        <div class="modal-pokemon-info">
+            <div class="info-section">
+                <h3>Información básica</h3>
+                <div class="pokemon-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Altura</span>
+                        <span class="detail-value">${pokemon.height ? pokemon.height + ' m' : '? m'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Peso</span>
+                        <span class="detail-value">${pokemon.weight ? pokemon.weight + ' kg' : '? kg'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Generación</span>
+                        <span class="detail-value">${pokemon.generation}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Categoría</span>
+                        <span class="detail-value">${categoryInfo}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="info-section">
+                <h3>Descripción</h3>
+                <p class="pokemon-description">${pokemon.description || 'No hay información disponible para este Pokémon.'}</p>
+            </div>
+            ${statsHTML}
+        </div>
+    `;
     
-    // Aplicar efectos especiales después de cargar los Pokémon
-    setTimeout(() => {
-        applySpecialEffects();
-    }, 1000);
-});
+    modal.classList.add('show');
+}
