@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokédex - Base de Datos de Pokémon</title>
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" href="Media/Poké_Ball.svg.png">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
     <!-- Encabezado -->
     <header>
         <div class="logo-container">
-            <img src="pokedex-logo.png" alt="Pokédex Logo" class="logo">
+            <img src="Media/pokedex-logo.png" alt="Pokédex Logo" class="logo">
         </div>
         <div class="search-container">
             <div class="search-wrapper">
@@ -108,34 +108,34 @@
 
     <!-- Pie de página -->
     <footer>
-        <div class="footer-content">
+        <div class="footer-container">
+            <div class="footer-content">
             <div class="footer-section">
-                <h3>Acerca de Pokédex</h3>
-                <p>Una base de datos completa con información detallada sobre todos los Pokémon. Diseñada para entrenadores y fans de Pokémon.</p>
+                <h3>Pokédex</h3>
+                <p>La guía definitiva de Pokémon con información detallada sobre cada especie, tipos, habilidades y estadísticas.</p>
             </div>
             <div class="footer-section">
                 <h3>Enlaces rápidos</h3>
-                <ul>
-                    <li><a href="#">Inicio</a></li>
-                    <li><a href="#">Tipos de Pokémon</a></li>
-                    <li><a href="#">Generaciones</a></li>
-                    <li><a href="#">Contacto</a></li>
+                <ul class="footer-links">
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#">Pokémon legendarios</a></li>
+                <li><a href="#">Pokémon míticos</a></li>
+                <li><a href="#">Generaciones</a></li>
                 </ul>
             </div>
             <div class="footer-section">
-                <h3>Síguenos</h3>
-                <div class="social-icons">
-                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
-                </div>
+                <h3>Contacto</h3>
+                <p>¿Tienes alguna sugerencia o encontraste un error?</p>
+                <a href="mailto:info@pokedex.com" class="contact-button">Contáctanos</a>
+            </div>
+            </div>
+            <div class="footer-bottom">
+            <p>&copy; 2025 Pokédex. Todos los derechos reservados.</p>
+            <p>Pokémon y todos los nombres relacionados son marcas registradas de Nintendo.</p>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Pokédex. Todos los derechos reservados.</p>
-        </div>
     </footer>
+
 
     <!-- Script para pasar los datos de PHP a JavaScript -->
     <script>
