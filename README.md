@@ -1,7 +1,5 @@
 <div align="center">
-  <img src="https://github.com/aalexxJA/pokedex/blob/main/Media/pokedex-logo.png" alt="Pokédex Logo" width="120" />
-
-  # 🕹️ Pokédex
+  <img src="https://github.com/aalexxJA/pokedex/blob/main/Media/pokedex-logo.png" alt="Pokédex Logo" width="180" />
 
   ¡Tu enciclopedia Pokémon interactiva, moderna y visual!
 </div>
